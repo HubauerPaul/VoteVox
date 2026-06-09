@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Main entry point for the VoteVox backend.
  * <p>
  * VoteVox is a secure QR-code based school voting system for HTL Wels.
- * The application guarantees voter anonymity by schema-level separation of
- * voter identity (Student) and ballot (Vote), enforced via the database schema
- * (no foreign key from votes to students), and by single-use cryptographic tokens
- * delivered through QR codes.
+ * The application guarantees voter anonymity by construction: voting tokens are
+ * anonymous and grouped only by school class (never bound to a person), and a
+ * cast Vote holds no reference back to the token that produced it. Eligibility
+ * is enforced purely by single-use cryptographic tokens delivered through QR codes.
  * </p>
  */
 @SpringBootApplication
