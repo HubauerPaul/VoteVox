@@ -26,7 +26,7 @@ Secure, QR‑code based digital voting system for school and department represen
 | Database   | PostgreSQL 16 (managed via Flyway migrations)            |
 | Voting UI  | React 18 + Vite + TypeScript (+ a QR scanner library)    |
 | Admin UI   | React 18 + Vite + TypeScript                             |
-| Build      | Maven (backend), pnpm (frontends)                        |
+| Build      | Maven (backend), npm (frontends)                         |
 | Local Dev  | Docker Compose (PostgreSQL + pgAdmin)                    |
 | CI         | GitHub Actions                                           |
 
@@ -99,7 +99,7 @@ it builds a clean `VoteVox-<date>.zip` (no `node_modules`, build output, certs o
 
 - Java 21 (JDK)
 - Maven 3.9+  (or use the included Maven Wrapper once generated)
-- Node.js 20+ and pnpm 9+
+- Node.js 20+ and npm
 - Docker + Docker Compose
 
 ### 1. Clone & configure
@@ -131,16 +131,16 @@ Flyway runs migrations automatically on startup. API is served on `http://localh
 
 ```bash
 cd voting-ui
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ### 5. Start the admin UI
 
 ```bash
 cd admin-ui
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ---

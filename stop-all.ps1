@@ -39,16 +39,6 @@ Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyCon
         try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop; Write-Host "[kill]   stopped backend JVM (PID $($_.ProcessId))" -ForegroundColor Green } catch {}
     }
 
-# --- Stop the Cloudflare tunnel (if running) ---------------------------------
-$cfProcs = Get-Process cloudflared -ErrorAction SilentlyContinue
-if ($cfProcs) {
-    $cfProcs | ForEach-Object {
-        try { Stop-Process -Id $_.Id -Force -ErrorAction Stop; Write-Host "[kill]   stopped cloudflared tunnel (PID $($_.Id))" -ForegroundColor Green } catch {}
-    }
-} else {
-    Write-Host "[kill]   no cloudflared tunnel running" -ForegroundColor DarkGray
-}
-
 # --- Docker ------------------------------------------------------------------
 if ($KeepDocker) {
     Write-Host "[docker] leaving containers running (-KeepDocker)." -ForegroundColor DarkGray
