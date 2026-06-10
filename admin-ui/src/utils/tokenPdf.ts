@@ -4,14 +4,39 @@ import { GeneratedToken } from '../types';
 
 /**
  * Base URL the QR codes point at. Must match the voting UI's /vote route so a
- * scan opens the ballot directly. Override per environment via VITE_QR_BASE_URL.
+ * scan opens the ballot directly.
+ *
+ * Resolution order (so the same build works on any machine / IP):
+ *   1. window.__VOTEVOX_QR_BASE_URL__ - injected at container start by the
+ *      admin-ui nginx entrypoint from the QR_BASE_URL env var (the production
+ *      Docker build; holds e.g. https://192.168.178.44:5173/vote).
+ *   2. VITE_QR_BASE_URL - optional build-time override (local dev).
+ *   3. Derived from the page's own host: the voting UI runs on port 5173 on the
+ *      same machine the admin opened, so we reuse the current hostname. This is
+ *      the robust fallback when no IP was injected.
  */
-const QR_BASE_URL =
-  (import.meta.env.VITE_QR_BASE_URL as string | undefined) ?? 'http://localhost:5173/vote';
+declare global {
+  interface Window {
+    __VOTEVOX_QR_BASE_URL__?: string;
+  }
+}
+
+function resolveQrBaseUrl(): string {
+  const injected = window.__VOTEVOX_QR_BASE_URL__;
+  // Ignore the un-substituted placeholder left in the template when no env was set.
+  if (injected && !injected.includes('__QR_BASE_URL__')) {
+    return injected;
+  }
+  const buildTime = import.meta.env.VITE_QR_BASE_URL as string | undefined;
+  if (buildTime) {
+    return buildTime;
+  }
+  return `${window.location.protocol}//${window.location.hostname}:5173/vote`;
+}
 
 /** The voting URL embedded in a token's QR code. */
 export function votingUrlFor(plaintext: string): string {
-  return `${QR_BASE_URL}?token=${encodeURIComponent(plaintext)}`;
+  return `${resolveQrBaseUrl()}?token=${encodeURIComponent(plaintext)}`;
 }
 
 // --- A4 grid layout (mm) ----------------------------------------------------

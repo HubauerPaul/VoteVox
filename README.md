@@ -65,7 +65,35 @@ The three modules (`backend`, `voting-ui`, `admin-ui`) each have their own build
 
 ---
 
-## Getting Started
+## Quick Start — one click (production, all in Docker)
+
+For a packaged run that a non-developer can start, **everything runs in Docker**
+(database, backend, and both UIs served by nginx over HTTPS):
+
+1. Install **Docker Desktop** (and start it once).
+2. Double-click **`VoteVox starten.bat`**.
+
+The launcher automatically starts Docker if needed, detects this PC's LAN IP,
+generates a trusted HTTPS certificate (mkcert) for it, builds & starts all
+containers, and opens the admin UI. QR codes point at `https://<this-pc-ip>:5173/vote`,
+so phones on the **same WiFi** can vote. Stop everything with **`VoteVox stoppen.bat`**.
+
+End-user guides: [`docs/Manual-Admin.md`](docs/Manual-Admin.md) and
+[`docs/Manual-Voter.md`](docs/Manual-Voter.md).
+
+To package the project for someone else, double-click **`Projekt-packen.bat`** —
+it builds a clean `VoteVox-<date>.zip` (no `node_modules`, build output, certs or
+`.git`). The recipient only needs Docker Desktop + `VoteVox starten.bat`.
+
+> First run downloads images and builds the app (a few minutes); later starts are fast.
+
+---
+
+## Getting Started (development)
+
+> Windows shortcut for the dev stack (hot-reloading dev servers): run
+> **`.\start-all.ps1`** (stop with **`.\stop-all.ps1`**). The steps below are the
+> manual equivalent.
 
 ### Prerequisites
 

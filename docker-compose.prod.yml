@@ -1,0 +1,62 @@
+# VoteVox - full production stack (everything in containers).
+# Start it with the one-click launcher:  "VoteVox starten.bat"
+# (which sets QR_BASE_URL to the machine's LAN IP and generates the TLS cert).
+#
+# Manual start:
+#   docker compose -f docker-compose.prod.yml up -d --build
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-votevox}
+      POSTGRES_USER: ${DB_USER:-votevox}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-votevox_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-votevox}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-votevox}
+      DB_USER: ${DB_USER:-votevox}
+      DB_PASSWORD: ${DB_PASSWORD:-votevox_secret}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-must-be-at-least-32-chars-long}
+      QR_BASE_URL: ${QR_BASE_URL:-http://localhost:5173/vote}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  voting-ui:
+    build: ./voting-ui
+    restart: unless-stopped
+    ports:
+      - "5173:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+
+  admin-ui:
+    build: ./admin-ui
+    restart: unless-stopped
+    ports:
+      - "5174:443"
+    environment:
+      # Baked into /votevox-config.js so the printed QR codes carry the LAN IP.
+      QR_BASE_URL: ${QR_BASE_URL:-}
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
